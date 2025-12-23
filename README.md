@@ -1,5 +1,11 @@
 # rnsec
 
+[![CI](https://github.com/adnxy/rnsec/actions/workflows/ci.yml/badge.svg)](https://github.com/adnxy/rnsec/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/adnxy/rnsec/actions/workflows/codeql.yml/badge.svg)](https://github.com/adnxy/rnsec/actions/workflows/codeql.yml)
+[![npm version](https://img.shields.io/npm/v/rnsec.svg?style=flat)](https://www.npmjs.com/package/rnsec)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 **🔒 Security Scanner for React Native & Expo**
 
 Find vulnerabilities in your mobile app with zero configuration.  
@@ -372,14 +378,47 @@ src/
 
 MIT License - see [LICENSE](LICENSE) for details
 
+## ⚠️ Disclaimer
+
+**rnsec is a static analysis tool and does not replace comprehensive security audits or penetration testing.**
+
+- ✅ Use rnsec as part of your security strategy
+- ✅ Review all findings manually
+- ✅ Combine with other security practices
+- ❌ Don't rely solely on rnsec for security
+- ❌ Static analysis cannot catch all vulnerabilities
+
+For production apps handling sensitive data, we recommend professional security audits.
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+- 🐛 [Report bugs](https://github.com/adnxy/rnsec/issues/new?template=bug_report.md)
+- 💡 [Request features](https://github.com/adnxy/rnsec/issues/new?template=feature_request.md)
+- 🔧 [Submit pull requests](https://github.com/adnxy/rnsec/pulls)
+- ⭐ [Star the repo](https://github.com/adnxy/rnsec)
+
+## 🗺️ Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for planned features and future direction.
+
 ## Support
 
-- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/rnsec/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/rnsec/discussions)
-- 📖 **Documentation**: [Wiki](https://github.com/yourusername/rnsec/wiki)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/adnxy/rnsec/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/adnxy/rnsec/discussions)
+- 📧 **Email**: adnanpoviolabs@gmail.com
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Babel](https://babeljs.io/) for AST parsing
+- [Commander.js](https://github.com/tj/commander.js) for CLI
+- [Chalk](https://github.com/chalk/chalk) for terminal styling
+- And many other amazing open source projects
 
 ---
 
 <p align="center">
-  Built with ❤️ for the React Native community
+  Built with ❤️ for the React Native community by <a href="https://github.com/adnxy">@adnxy</a>
 </p>

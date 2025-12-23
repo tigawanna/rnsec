@@ -1,19 +1,53 @@
 {
   "name": "rnsec",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Zero-config security scanner for React Native & Expo apps. Find vulnerabilities with 63 security rules covering Android, iOS, and React Native specific issues.",
+  "main": "dist/index.js",
   "bin": {
     "rnsec": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Tests coming soon\" && exit 0"
   },
-  "keywords": [],
+  "keywords": [
+    "react-native",
+    "security",
+    "scanner",
+    "static-analysis",
+    "vulnerability",
+    "expo",
+    "mobile",
+    "android",
+    "ios",
+    "security-audit",
+    "sast",
+    "code-analysis",
+    "security-scanner",
+    "mobile-security"
+  ],
   "type": "module",
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "adnxy <adnanpoviolabs@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adnxy/rnsec.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adnxy/rnsec/issues"
+  },
+  "homepage": "https://github.com/adnxy/rnsec#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "dependencies": {
     "@babel/parser": "^7.26.3",
     "@babel/traverse": "^7.26.5",
