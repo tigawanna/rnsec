@@ -111,7 +111,7 @@ rnsec identifies 63 different security issues across 13 categories:
 
 ```typescript
 // Hardcoded API keys and secrets
-const API_KEY = 'sk_live_4eC39HqLyjWDarjtT1zdp7dc';
+const API_KEY = 'your_secret_api_key_here'; // Never commit real keys!
 
 // Insecure data storage
 await AsyncStorage.setItem('user_token', token);
