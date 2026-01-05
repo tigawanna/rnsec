@@ -21,6 +21,7 @@ import { secretsRules } from '../scanners/secretsScanner.js';
 import { debugRules } from '../scanners/debugScanner.js';
 import { androidRules } from '../scanners/androidScanner.js';
 import { iosRules } from '../scanners/iosScanner.js';
+import { npmVulnerabilityRules, setNpmScannerConfig } from '../scanners/npmScanner.js';
 import type { ScanResult } from '../types/findings.js';
 import { VERSION, DEFAULT_REPORT_FILENAMES, EXIT_CODES } from '../constants.js';
 import { readRnsecConfig } from '../utils/fileUtils.js';
@@ -54,6 +55,7 @@ function registerAllRules(engine: RuleEngine): void {
   engine.registerRuleGroup(debugRules);
   engine.registerRuleGroup(androidRules);
   engine.registerRuleGroup(iosRules);
+  engine.registerRuleGroup(npmVulnerabilityRules);
 }
 
 /**
@@ -109,11 +111,20 @@ program
 
       // Load configuration
       const config = await readRnsecConfig(targetPath);
+      
+      // Pass config to npm scanner
+      setNpmScannerConfig(config);
+      
       if (config?.ignoredRules) {
         engine.setIgnoredRules(config.ignoredRules);
         if (config.ignoredRules.length > 0 && !options.silent) {
           console.log(chalk.yellow(`ℹ Ignoring ${config.ignoredRules.length} rule(s): ${config.ignoredRules.join(', ')}`));
         }
+      }
+      
+      // Show npm scanning status
+      if (config?.npmVulnerabilityScanning?.enabled === false && !options.silent) {
+        console.log(chalk.yellow('ℹ NPM vulnerability scanning is disabled'));
       }
 
       registerAllRules(engine);

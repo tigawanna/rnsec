@@ -15,6 +15,7 @@ export interface Finding {
   reason?: string; // Why this security issue matters
   suggestion?: string;
   isDebugContext?: boolean;
+  category?: string; // e.g., "npm", "config", "code"
 }
 
 export interface ScanResult {

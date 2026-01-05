@@ -33,6 +33,11 @@ export interface RuleGroup {
 
 export interface RnsecConfig {
   ignoredRules?: string[];
+  npmVulnerabilityScanning?: {
+    enabled?: boolean;
+    dataSource?: 'npm-audit' | 'hardcoded';
+    excludeDevDependencies?: boolean;
+  };
   // Future: other config options
 }
 
