@@ -163,7 +163,7 @@ program
 
       if (options.changedFiles) {
         const changedFiles = await getChangedFiles(options.changedFiles, targetPath);
-        
+
         if (changedFiles.length === 0) {
           if (!options.silent) {
             console.log(chalk.yellow('No files changed since the specified reference.'));

@@ -86,14 +86,12 @@ export async function isGitRepository(rootDir: string): Promise<boolean> {
 export async function getDefaultBranch(rootDir: string): Promise<string> {
   try {
     const resolvedRoot = resolve(rootDir);
-    
     const { stdout } = await execAsync(
-      'git symbolic-ref refs/remotes/origin/HEAD | sed \'s@^refs/remotes/origin/@@\'',
+      'git symbolic-ref refs/remotes/origin/HEAD',
       { cwd: resolvedRoot }
     );
-    
-    const branch = stdout.trim();
-    return branch || 'main';
+
+    return stdout.replace('refs/remotes/origin/', '').trim() || 'main';
   } catch {
     return 'main';
   }
