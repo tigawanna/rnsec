@@ -131,6 +131,20 @@ You can ignore specific rules by adding them to the `ignoredRules` array:
 
 To find the rule ID for a specific finding, check the `ruleId` field in the JSON output or HTML report.
 
+### Excluding Files
+
+You can exclude specific files and directories by adding exclude patterns to the `exclude` array:
+
+```jsonc
+{
+  "exclude": [
+    "**/scripts/**"
+  ]
+}
+```
+
+Any pattern supported by `fast-glob` can be used, for more information see [Pattern syntax](https://github.com/mrmlnc/fast-glob?tab=readme-ov-file#pattern-syntax).
+
 ## What It Detects
 
 rnsec identifies 63 different security issues across 13 categories:
