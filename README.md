@@ -92,6 +92,13 @@ rnsec scan --json
 rnsec rules
 ```
 
+**Scan only changed files:**
+```bash
+rnsec scan --changed-files main
+rnsec scan --changed-files abc123
+rnsec scan --changed-files ${{ github.base_ref }}
+```
+
 ### Command Options
 
 ```bash
@@ -103,6 +110,7 @@ Options:
   --output <filename>    Custom JSON report filename
   --json                 Output JSON to console only (no files)
   --silent               Suppress console output
+  --changed-files <ref>  Scan only files changed since git reference (branch, commit, or tag)
   -h, --help             Display help information
   -V, --version          Display version number
 ```
@@ -111,6 +119,57 @@ Options:
 
 - `0` - No high-severity issues found
 - `1` - High-severity security issues detected
+
+## Changed Files Scanning
+
+The `--changed-files` option allows you to scan only files that have changed since a specific git reference, making it perfect for CI/CD pipelines and pull request validation.
+
+### Usage
+
+```bash
+# Scan files changed since main branch
+rnsec scan --changed-files main
+
+# Scan files changed since specific commit
+rnsec scan --changed-files abc123def456
+
+# Scan files changed since a tag
+rnsec scan --changed-files v1.2.0
+
+# Use in CI/CD with JSON output
+rnsec scan --changed-files main --output security.json --silent
+```
+
+### Git References
+
+The `--changed-files` option accepts any valid git reference:
+
+- **Branch names**: `main`, `develop`, `feature/new-auth`
+- **Commit hashes**: `abc123def456`, `HEAD~1`
+- **Tags**: `v1.0.0`, `release-2024`
+- **Special references**: `HEAD`, `origin/main`
+
+### CI/CD Integration
+
+**GitHub Actions:**
+```yaml
+- name: Run security scan on PR changes
+  run: rnsec scan --changed-files ${{ github.base_ref }} --output security.json --silent
+```
+
+**GitLab CI:**
+```yaml
+security-scan:
+  script:
+    - rnsec scan --changed-files $CI_MERGE_REQUEST_TARGET_BRANCH_NAME --output security.json --silent
+```
+
+### Benefits
+
+- **Faster scans**: Only analyzes changed files instead of the entire codebase
+- **PR-focused**: Perfect for pull request validation
+- **CI/CD optimized**: Reduces pipeline execution time
+- **Incremental security**: Focus on new security issues introduced in changes
 
 ## Configuration
 

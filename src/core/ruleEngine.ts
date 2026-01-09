@@ -46,6 +46,39 @@ export class RuleEngine {
   }
 
   /**
+   * Run all registered rules on specific files
+   * @param filePaths - Array of specific file paths to scan
+   * @param progressCallback - Optional callback for progress updates
+   * @returns Scan results with findings and file count
+   */
+  async runRulesOnFiles(
+    filePaths: string[],
+    progressCallback?: (progress: { current: number; total: number }) => void
+  ): Promise<{ findings: Finding[]; scannedFiles: number; skippedFiles?: number }> {
+    const allFindings: Finding[] = [];
+    this.skippedFiles = 0;
+
+    const totalFiles = filePaths.length;
+
+    for (let i = 0; i < filePaths.length; i++) {
+      const filePath = filePaths[i];
+      
+      if (progressCallback) {
+        progressCallback({ current: i + 1, total: totalFiles });
+      }
+
+      const findings = await this.scanFile(filePath);
+      allFindings.push(...findings);
+    }
+
+    return { 
+      findings: allFindings, 
+      scannedFiles: totalFiles,
+      skippedFiles: this.skippedFiles > 0 ? this.skippedFiles : undefined
+    };
+  }
+
+  /**
    * Run all registered rules on a project
    * @param rootDir - Root directory of the project to scan
    * @param progressCallback - Optional callback for progress updates
