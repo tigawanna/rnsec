@@ -1,6 +1,6 @@
-import type { Rule, RuleContext, RuleGroup } from '../types/ruleTypes.js';
-import { Severity, type Finding } from '../types/findings.js';
-import { RuleCategory } from '../types/ruleTypes.js';
+import type { Rule, RuleContext, RuleGroup } from '../../types/ruleTypes.js';
+import { Severity, type Finding } from '../../types/findings.js';
+import { RuleCategory } from '../../types/ruleTypes.js';
 
 const expoInsecurePermissionsRule: Rule = {
   id: 'EXPO_INSECURE_PERMISSIONS',

@@ -1,9 +1,9 @@
 import _traverse from '@babel/traverse';
 const traverse = (_traverse as any).default || _traverse;
-import type { Rule, RuleContext, RuleGroup } from '../types/ruleTypes.js';
-import { Severity, type Finding } from '../types/findings.js';
-import { getLineNumber, extractSnippet } from '../utils/stringUtils.js';
-import { RuleCategory } from '../types/ruleTypes.js';
+import type { Rule, RuleContext, RuleGroup } from '../../types/ruleTypes.js';
+import { Severity, type Finding } from '../../types/findings.js';
+import { getLineNumber, extractSnippet } from '../../utils/stringUtils.js';
+import { RuleCategory } from '../../types/ruleTypes.js';
 
 const webviewJavascriptInjectionRule: Rule = {
   id: 'WEBVIEW_JAVASCRIPT_INJECTION',

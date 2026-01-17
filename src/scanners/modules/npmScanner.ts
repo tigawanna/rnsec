@@ -1,9 +1,9 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import type { Rule, RuleContext, RuleGroup, RnsecConfig } from '../types/ruleTypes.js';
-import { Severity, type Finding } from '../types/findings.js';
-import { getLineNumber, extractSnippet } from '../utils/stringUtils.js';
-import { RuleCategory } from '../types/ruleTypes.js';
+import type { Rule, RuleContext, RuleGroup, RnsecConfig } from '../../types/ruleTypes.js';
+import { Severity, type Finding } from '../../types/findings.js';
+import { getLineNumber, extractSnippet } from '../../utils/stringUtils.js';
+import { RuleCategory } from '../../types/ruleTypes.js';
 
 const execAsync = promisify(exec);
 

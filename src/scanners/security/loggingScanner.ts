@@ -1,10 +1,10 @@
 import _traverse from '@babel/traverse';
 const traverse = (_traverse as any).default || _traverse;
-import type { Rule, RuleContext, RuleGroup } from '../types/ruleTypes.js';
-import { Severity, type Finding } from '../types/findings.js';
-import { containsSensitiveKeyword, getLineNumber, extractSnippet } from '../utils/stringUtils.js';
-import { RuleCategory } from '../types/ruleTypes.js';
-import { SENSITIVE_DATA_CATEGORIES } from '../utils/sensitiveDataPatterns.js';
+import type { Rule, RuleContext, RuleGroup } from '../../types/ruleTypes.js';
+import { Severity, type Finding } from '../../types/findings.js';
+import { containsSensitiveKeyword, getLineNumber, extractSnippet } from '../../utils/stringUtils.js';
+import { RuleCategory } from '../../types/ruleTypes.js';
+import { SENSITIVE_DATA_CATEGORIES } from '../../utils/sensitiveDataPatterns.js';
 
 function categorizeSensitiveData(text: string): string {
   const lowerText = text.toLowerCase();

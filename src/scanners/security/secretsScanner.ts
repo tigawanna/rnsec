@@ -1,10 +1,10 @@
 import _traverse from '@babel/traverse';
 const traverse = (_traverse as any).default || _traverse;
-import type { Rule, RuleContext, RuleGroup } from '../types/ruleTypes.js';
-import { Severity, type Finding } from '../types/findings.js';
-import { getLineNumber, extractSnippet } from '../utils/stringUtils.js';
-import { RuleCategory } from '../types/ruleTypes.js';
-import { API_SECRET_PATTERNS } from '../utils/sensitiveDataPatterns.js';
+import type { Rule, RuleContext, RuleGroup } from '../../types/ruleTypes.js';
+import { Severity, type Finding } from '../../types/findings.js';
+import { getLineNumber, extractSnippet } from '../../utils/stringUtils.js';
+import { RuleCategory } from '../../types/ruleTypes.js';
+import { API_SECRET_PATTERNS } from '../../utils/sensitiveDataPatterns.js';
 
 const apiKeyDetectionRule: Rule = {
   id: 'API_KEY_EXPOSED',
