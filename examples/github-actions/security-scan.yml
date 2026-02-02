@@ -52,15 +52,40 @@ jobs:
           
           try {
             const markdownReport = fs.readFileSync('security-report.md', 'utf8');
+            const commentIdentifier = '<!-- rnsec-security-report -->';
             
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            // Find existing rnsec comment
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: markdownReport
+              issue_number: context.issue.number,
             });
+            
+            const existingComment = comments.find(comment => 
+              comment.body?.includes(commentIdentifier)
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: markdownReport
+              });
+              console.log('Updated existing security report comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: markdownReport
+              });
+              console.log('Created new security report comment');
+            }
           } catch (error) {
-            console.log('No security report found or error reading report:', error.message);
+            console.log('Error posting security report:', error.message);
           }
     
     - name: Full security scan (optional)
