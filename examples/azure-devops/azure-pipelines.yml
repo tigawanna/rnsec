@@ -1,0 +1,119 @@
+# Azure DevOps Pipeline Security Scan Configuration
+# Add this to your azure-pipelines.yml file
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '18.x'
+    displayName: 'Install Node.js'
+
+  - script: |
+      npm install -g rnsec
+    displayName: 'Install rnsec'
+
+  - script: |
+      # Determine if this is a PR
+      if [ -n "$(System.PullRequest.TargetBranch)" ]; then
+        # PR scan - only changed files
+        TARGET_BRANCH=$(echo "$(System.PullRequest.TargetBranch)" | sed 's|refs/heads/||')
+        rnsec scan --changed-files origin/$TARGET_BRANCH --md security-report.md --output security-report.json --silent || true
+      else
+        # Full scan for branch commits
+        rnsec scan --md security-report.md --html security-report.html --json security-report.json || true
+      fi
+    displayName: 'Run Security Scan'
+    continueOnError: 'true'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)'
+      ArtifactName: 'security-reports'
+    displayName: 'Publish Security Reports'
+    condition: always()
+
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Only post comment for PRs
+        if ($env:SYSTEM_PULLREQUEST_PULLREQUESTID) {
+          $reportContent = Get-Content -Path "security-report.md" -Raw
+          
+          # Azure DevOps API endpoint
+          $orgUrl = "$env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI"
+          $project = "$env:SYSTEM_TEAMPROJECT"
+          $repoId = "$env:BUILD_REPOSITORY_ID"
+          $prId = "$env:SYSTEM_PULLREQUEST_PULLREQUESTID"
+          
+          $url = "$orgUrl$project/_apis/git/repositories/$repoId/pullRequests/$prId/threads?api-version=7.0"
+          
+          # Get existing threads
+          $headers = @{
+            Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"
+            "Content-Type" = "application/json"
+          }
+          
+          $threads = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+          
+          # Find existing rnsec thread
+          $existingThread = $threads.value | Where-Object { 
+            $_.comments[0].content -like "*<!-- rnsec-security-report -->*" 
+          } | Select-Object -First 1
+          
+          $commentBody = @{
+            comments = @(
+              @{
+                parentCommentId = 0
+                content = $reportContent
+                commentType = 1
+              }
+            )
+            status = 1
+          } | ConvertTo-Json -Depth 10
+          
+          if ($existingThread) {
+            # Update existing thread
+            $threadId = $existingThread.id
+            $updateUrl = "$orgUrl$project/_apis/git/repositories/$repoId/pullRequests/$prId/threads/$threadId/comments/1?api-version=7.0"
+            
+            $updateBody = @{
+              content = $reportContent
+            } | ConvertTo-Json
+            
+            Invoke-RestMethod -Uri $updateUrl -Headers $headers -Method Patch -Body $updateBody
+            Write-Host "Updated existing security report comment"
+          } else {
+            # Create new thread
+            Invoke-RestMethod -Uri $url -Headers $headers -Method Post -Body $commentBody
+            Write-Host "Created new security report comment"
+          }
+        }
+    displayName: 'Post PR Comment'
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+# Required Azure DevOps Configuration:
+# 1. Enable "Allow scripts to access the OAuth token" in pipeline settings
+#    Pipeline > Edit > ... (More actions) > Triggers > YAML > Get sources
+#    Check "Allow scripts to access the OAuth token"
+#
+# 2. Grant build service permissions:
+#    Project Settings > Repositories > Security
+#    Find "[Project Name] Build Service"
+#    Grant "Contribute to pull requests" permission
