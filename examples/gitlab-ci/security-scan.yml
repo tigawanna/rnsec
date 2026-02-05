@@ -1,0 +1,66 @@
+# GitLab CI/CD Security Scan Configuration
+# Add this to your .gitlab-ci.yml file
+
+security-scan:
+  stage: test
+  image: node:18
+  
+  before_script:
+    - npm install -g rnsec
+  
+  script:
+    # Run security scan on changed files
+    - |
+      if [ -n "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ]; then
+        rnsec scan --changed-files origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --md security-report.md --output security-report.json --silent
+      else
+        rnsec scan --md security-report.md --output security-report.json --silent
+      fi
+    
+    # Post comment to merge request
+    - |
+      if [ -n "$CI_MERGE_REQUEST_IID" ]; then
+        REPORT=$(cat security-report.md)
+        
+        # Escape JSON special characters
+        REPORT_JSON=$(echo "$REPORT" | jq -Rs .)
+        
+        # Check for existing comment
+        EXISTING_COMMENT=$(curl --silent --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+          "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes" \
+          | jq '.[] | select(.body | contains("<!-- rnsec-security-report -->")) | .id' | head -1)
+        
+        if [ -n "$EXISTING_COMMENT" ]; then
+          # Update existing comment
+          curl --request PUT --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data "{\"body\": $REPORT_JSON}" \
+            "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes/$EXISTING_COMMENT"
+          echo "Updated existing security report comment"
+        else
+          # Create new comment
+          curl --request POST --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data "{\"body\": $REPORT_JSON}" \
+            "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes"
+          echo "Created new security report comment"
+        fi
+      fi
+  
+  artifacts:
+    paths:
+      - security-report.md
+      - security-report.json
+    expire_in: 30 days
+  
+  only:
+    - merge_requests
+    - main
+    - develop
+  
+  allow_failure: true
+
+# Required GitLab CI/CD Variables:
+# - GITLAB_TOKEN: Personal access token with api scope
+#   Create at: Settings > Access Tokens > Add new token
+#   Scopes needed: api, read_api, write_repository

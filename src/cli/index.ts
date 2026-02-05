@@ -8,6 +8,7 @@ import gradient from 'gradient-string';
 import { RuleEngine } from '../core/ruleEngine.js';
 import { Reporter } from '../core/reporter.js';
 import { HtmlReporter } from '../core/htmlReporter.js';
+import { MarkdownReporter } from '../core/markdownReporter.js';
 import { storageRules } from '../scanners/security/storageScanner.js';
 import { networkRules } from '../scanners/security/networkScanner.js';
 import { loggingRules } from '../scanners/security/loggingScanner.js';
@@ -38,6 +39,7 @@ interface ScanOptions {
   output?: string;
   silent?: boolean;
   changedFiles?: string;
+  md?: string;
 }
 
 /**
@@ -94,6 +96,7 @@ program
   .option('--output <filename>', 'Save JSON results to file')
   .option('--silent', 'Suppress console output')
   .option('--changed-files <ref>', 'Scan only files changed since git reference (branch, commit, or tag)')
+  .option('--md <filename>', 'Generate Markdown report for PR comments (e.g., security-report.md)')
   .action(async (options: ScanOptions) => {
     try {
       const targetPath = options.path;
@@ -215,8 +218,9 @@ program
 
       const htmlPath = options.html || (!options.json ? DEFAULT_REPORT_FILENAMES.HTML : null);
       const jsonPath = options.output || (!options.json ? DEFAULT_REPORT_FILENAMES.JSON : null);
+      const mdPath = options.md;
 
-      const generatedReports: { html?: string; json?: string } = {};
+      const generatedReports: { html?: string; json?: string; md?: string } = {};
 
       if (htmlPath && !options.json) {
         const htmlReporter = new HtmlReporter();
@@ -232,6 +236,16 @@ program
         const absolutePath = resolve(jsonPath);
         await fs.writeFile(jsonPath, JSON.stringify(result, null, 2));
         generatedReports.json = absolutePath;
+      }
+
+      if (mdPath) {
+        const markdownReporter = new MarkdownReporter();
+        const fs = await import('fs/promises');
+        const { resolve } = await import('path');
+        const absolutePath = resolve(mdPath);
+        const markdownContent = markdownReporter.generateReport(result);
+        await fs.writeFile(absolutePath, markdownContent);
+        generatedReports.md = absolutePath;
       }
 
       const reporter = new Reporter({

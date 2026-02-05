@@ -108,6 +108,7 @@ Options:
   -p, --path <path>      Project directory to scan (default: current directory)
   --html <filename>      Custom HTML report filename
   --output <filename>    Custom JSON report filename
+  --md <filename>        Generate Markdown report for PR comments
   --json                 Output JSON to console only (no files)
   --silent               Suppress console output
   --changed-files <ref>  Scan only files changed since git reference (branch, commit, or tag)
@@ -170,6 +171,128 @@ security-scan:
 - **PR-focused**: Perfect for pull request validation
 - **CI/CD optimized**: Reduces pipeline execution time
 - **Incremental security**: Focus on new security issues introduced in changes
+
+## GitHub PR Comments Integration
+
+Generate markdown reports that can be automatically posted as GitHub PR comments, bringing security results directly into your pull requests with advanced features like automatic comment updates, comparison tracking, and security metrics.
+
+### Usage
+
+```bash
+# Generate markdown report for PR comment
+rnsec scan --md security-report.md --silent
+
+# Combine with changed files for PR-focused scanning
+rnsec scan --changed-files main --md pr-security-report.md --silent
+```
+
+### Advanced Features
+
+#### Smart Comment Management
+- **Automatic updates**: Detects and updates existing comments instead of creating duplicates
+- **No spam**: Keeps PR conversations clean by updating the same comment
+- **Unique identifier**: Uses hidden HTML markers to identify rnsec comments
+
+#### Comparison Tracking
+- **New/resolved issues**: Automatically shows which issues were introduced or fixed
+- **Trend indicators**: Visual indicators for improving/declining security posture
+- **Historical data**: Stores scan results for comparison between runs
+
+#### Security Metrics
+- **Security score**: 0-100 score based on issue severity and count
+- **Vulnerability density**: Issues per 1000 lines of code
+- **Trend analysis**: Automatic detection of improving/declining/stable trends
+- **Visual dashboards**: Comprehensive metrics in markdown format
+
+#### Enhanced Formatting
+- **Collapsible sections**: Each severity level can be expanded/collapsed
+- **Code snippets**: Shows vulnerable code with syntax highlighting
+- **Better organization**: Reduces clutter for reports with many issues
+
+### GitHub Actions Workflow
+
+Copy the example workflow from `examples/github-actions/security-scan.yml`:
+
+```yaml
+name: 🔒 Security Scan
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Install rnsec
+      run: npm install -g rnsec
+    
+    - name: Run security scan
+      run: |
+        rnsec scan --changed-files ${{ github.base_ref || 'main' }} --md security-report.md --output rnsec-report.json --silent
+      continue-on-error: true
+    
+    - name: Comment PR with security results
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const markdownReport = fs.readFileSync('security-report.md', 'utf8');
+          const commentIdentifier = '<!-- rnsec-security-report -->';
+          
+          // Find and update existing comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const existingComment = comments.find(c => c.body?.includes(commentIdentifier));
+          
+          if (existingComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existingComment.id,
+              body: markdownReport
+            });
+          } else {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: markdownReport
+            });
+          }
+```
+
+### Multi-Platform Support
+
+#### GitLab CI/CD
+See `examples/gitlab-ci/security-scan.yml` for GitLab merge request integration.
+
+#### Bitbucket Pipelines
+See `examples/bitbucket-pipelines/bitbucket-pipelines.yml` for Bitbucket pull request integration.
+
+#### Azure DevOps
+See `examples/azure-devops/azure-pipelines.yml` for Azure Pipelines integration.
+
+### Example PR Comment
+
+The enhanced markdown report includes:
+- **Summary table** with issue counts by severity
+- **Comparison data** showing new/resolved issues since last scan
+- **Security metrics dashboard** with score and trends
+- **Collapsible findings** organized by severity
+- **Code snippets** with syntax highlighting
+- **Risk assessment** with clear action items
+- **Performance metrics** and scan information
 
 ## Configuration
 
